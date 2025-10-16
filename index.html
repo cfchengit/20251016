@@ -25,22 +25,22 @@
 
     /* 2. 設置 iFrame 的樣式 */
     #h5pIframe {
-        position: absolute; /* 絕對定位 */
+        position: absolute; 
         top: 0;
         left: 0;
         z-index: 1; /* 確保 iFrame 在底部 */
     }
 
-    /* 3. 設置 p5.js 畫布的樣式 */
-    /* p5.js 畫布會自動在 DOM 中創建，通常在 body 或您指定的容器內 */
+    /* 3. 關鍵修改：讓 p5.js 畫布在開始時預設隱藏 */
     canvas {
-        position: absolute; /* 絕對定位 */
+        position: absolute; 
         top: 0;
         left: 0;
-        z-index: 10; /* 確保 p5.js 畫布在 iFrame 頂部 */
-        /* 讓畫布背景透明，這樣 iFrame 內容可以透過未繪圖的區域顯示出來 */
+        z-index: 10; 
         background-color: transparent; 
-        pointer-events: none; /* 允許點擊穿透到下面的 iFrame，這樣學生才能完成 H5P 測驗 */
+        
+        /* 設置初始隱藏狀態 */
+        display: none; 
     }
 </style>
 </head>
@@ -62,6 +62,7 @@
     <!-- 分數將顯示在 p5.js 創建的 Canvas 上 -->
 </body>
 </html>
+
 
 
 
