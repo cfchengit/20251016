@@ -15,21 +15,34 @@
     <!-- 確保 JS 檔案載入順序正確，以讓變數作用於全域範圍 [4] -->
     <script src="sketch.js"></script>
     
-    <style>
-        /* 讓內容置中方便查看 */
-        body { 
-            margin: 0; 
-            display: flex; 
-            flex-direction: column;
-            align-items: center; 
-            min-height: 100vh; 
-            font-family: Arial, sans-serif;
-        }
-        #h5pContainer {
-            margin-top: 20px;
-        }
-        /* p5.js Canvas 會自動創建在 body 內 */
-    </style>
+<style>
+    /* 1. 設置容器為相對定位 */
+    #overlay-container {
+        position: relative;
+        width: 800px; /* 寬度應與 iFrame 相同 */
+        height: 600px; /* 高度應與 iFrame 相同 */
+    }
+
+    /* 2. 設置 iFrame 的樣式 */
+    #h5pIframe {
+        position: absolute; /* 絕對定位 */
+        top: 0;
+        left: 0;
+        z-index: 1; /* 確保 iFrame 在底部 */
+    }
+
+    /* 3. 設置 p5.js 畫布的樣式 */
+    /* p5.js 畫布會自動在 DOM 中創建，通常在 body 或您指定的容器內 */
+    canvas {
+        position: absolute; /* 絕對定位 */
+        top: 0;
+        left: 0;
+        z-index: 10; /* 確保 p5.js 畫布在 iFrame 頂部 */
+        /* 讓畫布背景透明，這樣 iFrame 內容可以透過未繪圖的區域顯示出來 */
+        background-color: transparent; 
+        pointer-events: none; /* 允許點擊穿透到下面的 iFrame，這樣學生才能完成 H5P 測驗 */
+    }
+</style>
 </head>
 <body>
     <h1>H5P 互動與 p5.js 成績顯示</h1>
@@ -49,5 +62,6 @@
     <!-- 分數將顯示在 p5.js 創建的 Canvas 上 -->
 </body>
 </html>
+
 
 
