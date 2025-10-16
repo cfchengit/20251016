@@ -47,17 +47,31 @@ window.addEventListener('message', function (event) {
 // 步驟二：使用 p5.js 繪製分數 (在網頁 Canvas 上顯示)
 // -----------------------------------------------------------------
 
-function setup() { 
-    // ... (其他設置)
-    createCanvas(windowWidth / 2, windowHeight / 2); 
-    background(255); 
-    noLoop(); // 如果您希望分數只有在改變時才繪製，保留此行
+// function setup() { 
+//     // ... (其他設置)
+//     createCanvas(windowWidth / 2, windowHeight / 2); 
+//     background(255); 
+//     noLoop(); // 如果您希望分數只有在改變時才繪製，保留此行
+// } 
+// 在 setup() 中將 canvas 放置到容器內
+function setup() {
+    // 讓 Canvas 尺寸匹配 iFrame
+    const container = document.getElementById('overlay-container');
+    const w = container.offsetWidth;
+    const h = container.offsetHeight;
+
+    let canvas = createCanvas(w, h); 
+    canvas.parent('overlay-container'); // 將畫布附加到容器
+    noLoop(); 
 } 
-
 // score_display.js 中的 draw() 函數片段
-
 function draw() { 
-    background(255); // 清除背景
+    // 關鍵：每次繪製時，清除畫布，但如果希望背景透明，
+    // 您可以使用透明度低的 background(255, 0)
+    // 或者只在您需要覆蓋 H5P 內容時才繪製背景。
+    clear(); // 清除畫布，使其完全透明
+// function draw() { 
+//     background(255); // 清除背景
 
     // 計算百分比
     let percentage = (finalScore / maxScore) * 100;
@@ -90,10 +104,14 @@ function draw() {
     }
 
     // 顯示具體分數
-    textSize(50);
-    fill(50);
-    text(`得分: ${finalScore}/${maxScore}`, width / 2, height / 2 + 50);
-    
+    // textSize(50);
+    // fill(50);
+    // text(`得分: ${finalScore}/${maxScore}`, width / 2, height / 2 + 50);
+    // 繪製分數文本
+    textSize(50); 
+    fill(0, 50, 200); 
+    textAlign(CENTER); 
+    text(scoreText, width / 2, height / 2); // 將文本繪製在 iFrame 中央
     
     // -----------------------------------------------------------------
     // B. 根據分數觸發不同的幾何圖形反映 (畫面反映二)
