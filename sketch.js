@@ -95,10 +95,10 @@ function draw() {
     // fill(50);
     // text(`得分: ${finalScore}/${maxScore}`, width / 2, height / 2 + 50);
     // 繪製分數文本
-    textSize(50); 
-    fill(0, 50, 200); 
-    textAlign(CENTER); 
-    text(scoreText, width / 2, height / 2); // 將文本繪製在 iFrame 中央
+    // textSize(50); 
+    // fill(0, 50, 200); 
+    // textAlign(CENTER); 
+    // text(scoreText, width / 2, height / 2); // 將文本繪製在 iFrame 中央
     
     // -----------------------------------------------------------------
     // B. 根據分數觸發不同的幾何圖形反映 (畫面反映二)
