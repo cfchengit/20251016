@@ -23,60 +23,34 @@ function setup() {
     
     noLoop(); 
 } 
-
-// H5P.externalDispatcher.on('xAPI', function(event){
-//     // event.getScore() 取得分數，event.getMaxScore() 取得滿分
-//     if (event.getScore() === event.getMaxScore() && event.getMaxScore() > 0){
-//         // 這裡可以將分數儲存到變數中或進行其他操作
-//         console.log('使用者獲得了滿分！');
-//     }
-// });
-
-// window.addEventListener('message', function (event) {
-//     // 執行來源驗證...
-//     // ...
-//     const data = event.data;
-    
-//     if (data && data.type === 'H5P_SCORE_RESULT') {
-        
-//         // !!! 關鍵步驟：更新全域變數 !!!
-//         finalScore = data.score; // 更新全域變數
-//         maxScore = data.maxScore;
-//         scoreText = `最終成績分數: ${finalScore}/${maxScore}`;
-        
-//         console.log("新的分數已接收:", scoreText); 
-        
-//         // ----------------------------------------
-//         // 關鍵步驟 2: 呼叫重新繪製 (見方案二)
-//         // ----------------------------------------
-//         if (typeof redraw === 'function') {
-//             redraw(); 
-//         }
-//     }
-// }, false);
-
-
 // =================================================================
-// 步驟二：使用 p5.js 繪製分數 (在網頁 Canvas 上顯示)
-// -----------------------------------------------------------------
+// 接收 postMessage 消息並更新分數
+// =================================================================
+window.addEventListener('message', function (event) {
+    
+    // ... (執行來源驗證邏輯) ...
 
-// function setup() { 
-//     // ... (其他設置)
-//     createCanvas(windowWidth / 2, windowHeight / 2); 
-//     background(255); 
-//     noLoop(); // 如果您希望分數只有在改變時才繪製，保留此行
-// } 
-// 在 setup() 中將 canvas 放置到容器內
-// function setup() {
-//     // 讓 Canvas 尺寸匹配 iFrame
-//     const container = document.getElementById('overlay-container');
-//     const w = container.offsetWidth;
-//     const h = container.offsetHeight;
+    const data = event.data;
+    
+    if (data && data.type === 'H5P_SCORE_RESULT') {
+        
+        // 1. 更新全域變數
+        finalScore = data.score;
+        maxScore = data.maxScore;
+        scoreText = `最終成績分數: ${finalScore}/${maxScore}`;
 
-//     let canvas = createCanvas(w, h); 
-//     canvas.parent('overlay-container'); // 將畫布附加到容器
-//     noLoop(); 
-// } 
+        // // 2. 關鍵步驟：顯示 p5.js 畫布
+        if (scoreCanvas) {
+            scoreCanvas.show(); // 顯示畫布 (等同於將 display 設為 block)
+        }
+        
+        // // 3. 呼叫 p5.js 重新繪製
+        if (typeof redraw === 'function') {
+            redraw(); 
+        }
+    }
+}, false);
+
 // score_display.js 中的 draw() 函數片段
 function draw() { 
     // 關鍵：每次繪製時，清除畫布，但如果希望背景透明，
@@ -147,37 +121,4 @@ function draw() {
     // 或使用 sin/cos 函數讓圖案的動畫效果有所不同 [8, 9]。
 }
 
-// =================================================================
-// 接收 postMessage 消息並更新分數
-// =================================================================
-window.addEventListener('message', function (event) {
-    
-    // ... (執行來源驗證邏輯) ...
 
-    const data = event.data;
-    
-    if (data && data.type === 'H5P_SCORE_RESULT') {
-        
-        // 1. 更新全域變數
-        finalScore = data.score;
-        maxScore = data.maxScore;
-        scoreText = `最終成績分數: ${finalScore}/${maxScore}`;
-
-        // // 2. 關鍵步驟：顯示 p5.js 畫布
-        // if (scoreCanvas) {
-        //     scoreCanvas.show(); // 顯示畫布 (等同於將 display 設為 block)
-        // }
-        
-        // // 3. 呼叫 p5.js 重新繪製
-        // if (typeof redraw === 'function') {
-        //     redraw(); 
-        // }
-
-        if (scoreCanvas) {
-    scoreCanvas.show(); // 顯示畫布
-}
-if (typeof redraw === 'function') {
-    redraw(); // 強制執行 draw() 繪製最新分數
-}
-    }
-}, false);
