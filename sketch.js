@@ -63,7 +63,7 @@ function draw() {
     // 計算百分比
     let percentage = (finalScore / maxScore) * 100;
 
-    textSize(80); 
+    textSize(50); 
     textAlign(CENTER);
     
     // -----------------------------------------------------------------
@@ -72,17 +72,17 @@ function draw() {
     if (percentage >= 90) {
         // 滿分或高分：顯示鼓勵文本，使用鮮豔顏色
         fill(0, 200, 50); // 綠色 [6]
-        text("恭喜！優異成績！", width / 2, height / 2 - 50);
+        text("恭喜！優異成績！", width / 2, height / 2 -70);
         
     } else if (percentage >= 60) {
         // 中等分數：顯示一般文本，使用黃色 [6]
         fill(255, 181, 35); 
-        text("成績良好，請再接再厲。", width / 2, height / 2 - 50);
+        text("成績良好，請再接再厲。", width / 2, height / 2 - 70);
         
     } else if (percentage > 0) {
         // 低分：顯示警示文本，使用紅色 [6]
         fill(200, 0, 0); 
-        text("需要加強努力！", width / 2, height / 2 - 50);
+        text("需要加強努力！", width / 2, height / 2 - 70);
         
     } else {
         // 尚未收到分數或分數為 0
