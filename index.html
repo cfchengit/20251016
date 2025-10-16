@@ -15,37 +15,40 @@
     <script src="sketch.js"></script>
     
 <style>
-    /* 移除 body 上的 height: 100vh 和複雜的 flex 設置 */
+    /* 1. 調整 body 樣式：移除可能干擾置中的全高設定，並讓 H1 標題置中 */
     body { 
         margin: 0; 
-        text-align: center; /* 讓標題 H1 置中 */
+        text-align: center; /* 確保 H1 標題居中 */
         font-family: Arial, sans-serif;
         padding-top: 20px; /* 給頂部標題留出一些空間 */
     }
 
-    /* 1. 設置容器為相對定位，並確保容器本身水平置中 */
+    /* 2. 關鍵修正：設置容器寬度並使用 margin: auto 實現水平置中 */
     #overlay-container {
         position: relative;
-        width: 800px; /* 寬度應與 iFrame 尺寸匹配 */
-        height: 600px; /* 高度應與 iFrame 尺寸匹配 */
-        margin: 20px auto; /* 關鍵：讓容器水平置中 */
+        width: 800px; /* 必須設置固定寬度 */
+        height: 600px; /* 必須設置固定高度 */
+        margin: 20px auto; /* 關鍵：讓此塊級元素水平置中 */
     }
 
-    /* 2. iFrame 和 Canvas 保持絕對定位並完全重疊 */
+    /* 3. iFrame 和 Canvas 保持絕對定位並完全重疊 */
     #h5pIframe, canvas {
         position: absolute; 
         top: 0;
         left: 0;
+        width: 100%; /* 確保它們填滿 800px 的容器 */
+        height: 100%;
     }
 
-    /* 3. p5.js 畫布預設隱藏 */
+    /* 4. p5.js 畫布預設隱藏 */
     canvas {
         z-index: 10; 
         background-color: transparent; 
         display: none; /* 初始隱藏 */
+        pointer-events: none; /* 允許點擊穿透到下面的 iFrame */
     }
     
-    /* 4. iFrame 保持可見和在底部 */
+    /* 5. iFrame 保持在底部 */
     #h5pIframe {
         z-index: 1; 
     }
@@ -69,6 +72,7 @@
     <!-- 分數將顯示在 p5.js 創建的 Canvas 上 -->
 </body>
 </html>
+
 
 
 
