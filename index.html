@@ -15,31 +15,39 @@
     <script src="sketch.js"></script>
     
 <style>
-    /* 1. 設置容器為相對定位 */
+    /* 移除 body 上的 height: 100vh 和複雜的 flex 設置 */
+    body { 
+        margin: 0; 
+        text-align: center; /* 讓標題 H1 置中 */
+        font-family: Arial, sans-serif;
+        padding-top: 20px; /* 給頂部標題留出一些空間 */
+    }
+
+    /* 1. 設置容器為相對定位，並確保容器本身水平置中 */
     #overlay-container {
         position: relative;
-        width: 800px; /* 寬度應與 iFrame 相同 */
-        height: 600px; /* 高度應與 iFrame 相同 */
+        width: 800px; /* 寬度應與 iFrame 尺寸匹配 */
+        height: 600px; /* 高度應與 iFrame 尺寸匹配 */
+        margin: 20px auto; /* 關鍵：讓容器水平置中 */
     }
 
-    /* 2. 設置 iFrame 的樣式 */
-    #h5pIframe {
+    /* 2. iFrame 和 Canvas 保持絕對定位並完全重疊 */
+    #h5pIframe, canvas {
         position: absolute; 
         top: 0;
         left: 0;
-        z-index: 1; /* 確保 iFrame 在底部 */
     }
 
-    /* 3. 關鍵修改：讓 p5.js 畫布在開始時預設隱藏 */
+    /* 3. p5.js 畫布預設隱藏 */
     canvas {
-        position: absolute; 
-        top: 0;
-        left: 0;
         z-index: 10; 
         background-color: transparent; 
-        
-        /* 設置初始隱藏狀態 */
-        display: none; 
+        display: none; /* 初始隱藏 */
+    }
+    
+    /* 4. iFrame 保持可見和在底部 */
+    #h5pIframe {
+        z-index: 1; 
     }
 </style>
 </head>
@@ -61,6 +69,7 @@
     <!-- 分數將顯示在 p5.js 創建的 Canvas 上 -->
 </body>
 </html>
+
 
 
 
