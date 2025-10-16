@@ -163,14 +163,21 @@ window.addEventListener('message', function (event) {
         maxScore = data.maxScore;
         scoreText = `最終成績分數: ${finalScore}/${maxScore}`;
 
-        // 2. 關鍵步驟：顯示 p5.js 畫布
-        if (scoreCanvas) {
-            scoreCanvas.show(); // 顯示畫布 (等同於將 display 設為 block)
-        }
+        // // 2. 關鍵步驟：顯示 p5.js 畫布
+        // if (scoreCanvas) {
+        //     scoreCanvas.show(); // 顯示畫布 (等同於將 display 設為 block)
+        // }
         
-        // 3. 呼叫 p5.js 重新繪製
-        if (typeof redraw === 'function') {
-            redraw(); 
-        }
+        // // 3. 呼叫 p5.js 重新繪製
+        // if (typeof redraw === 'function') {
+        //     redraw(); 
+        // }
+
+        if (scoreCanvas) {
+    scoreCanvas.show(); // 顯示畫布
+}
+if (typeof redraw === 'function') {
+    redraw(); // 強制執行 draw() 繪製最新分數
+}
     }
 }, false);
