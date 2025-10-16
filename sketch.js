@@ -47,29 +47,23 @@ window.addEventListener('message', function (event) {
 // 步驟二：使用 p5.js 繪製分數 (在網頁 Canvas 上顯示)
 // -----------------------------------------------------------------
 
-// setup() 函數：只會在程式開始時執行一次
-function setup() {
-    // 創建一個與窗口同大小的畫布
-    createCanvas(windowWidth / 2, windowHeight / 2);
-    background(255, 255, 255); // 設定白色背景
-    noLoop(); // 由於分數是靜態的，我們只繪製一次
+function setup() { 
+    // ... (其他設置)
+    createCanvas(windowWidth / 2, windowHeight / 2); 
+    background(255); 
+    noLoop(); // 如果您希望分數只有在改變時才繪製，保留此行
+} 
+
+function draw() { 
+    // 1. 清除背景，以防留下舊分數的軌跡
+    background(255); 
+    
+    // 2. 使用全域變數 `scoreText` 繪製文本
+    textSize(50); 
+    fill(0); 
+    textAlign(CENTER);
+    
+    // 確保即使初始分數是 0，也會顯示文字
+    const display = scoreText || "等待 H5P 成績..."; 
+    text(display, width / 2, height / 2); 
 }
-
-// draw() 函數：不斷重複執行，但在 setup() 中使用 noLoop() 後只執行一次
-function draw() {
-    // 1. 設定文字樣式
-    textSize(50); // 設定文字大小
-    fill(0, 50, 200); // 藍色填充文字 (fill() 設定文本填充顏色)
-
-    // 2. 繪製文本
-    // text(文本內容, x座標, y座標)
-    // 我們將文本放在畫布中央
-    textAlign(CENTER); // 將文本對齊模式設為置中 (CENTER)
-    text(scoreText, width / 2, height / 2);
-
-    // 額外資訊：顯示滑鼠座標以供測試
-    textSize(18);
-    fill(100);
-    text("重新載入頁面以更新分數", width / 2, height / 2 + 50);
-}
-
