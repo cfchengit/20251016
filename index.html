@@ -25,19 +25,18 @@
 
     /* 2. 關鍵修正：設置容器寬度並使用 margin: auto 實現水平置中 */
     #overlay-container {
-        position: relative;
-        width: 800px; /* 必須設置固定寬度 */
-        height: 600px; /* 必須設置固定高度 */
-        margin: 20px auto; /* 關鍵：讓此塊級元素水平置中 */
-    }
-
+    position: relative;
+    width: 800px; 
+    height: 600px; 
+    margin: 20px auto; 
+}
     /* 3. iFrame 和 Canvas 保持絕對定位並完全重疊 */
     #h5pIframe, canvas {
         position: absolute; 
-        top: 100;
-        left: 100;
-        width: 50%; /* 確保它們填滿 800px 的容器 */
-        height: 50%;
+        top: 0;
+        left: 0;
+        width: 100%; /* 確保它們填滿 800px 的容器 */
+        height: 100%;
     }
 
     /* 4. p5.js 畫布預設隱藏 */
@@ -55,11 +54,11 @@
 </style>
 </head>
 <body>
-    <h1>H5P 互動與 p5.js 成績顯示</h1>
+   <h1>H5P 互動與 p5.js 成績顯示</h1>
 
-    <div id="h5pContainer">
+    <!-- 將 id="h5pContainer" 修正為 id="overlay-container" -->
+    <div id="overlay-container"> 
         <!-- 嵌入 H5P 匯出檔案 -->
-        <!-- 將 src 設為 H5P 匯出的 HTML 檔名，例如 h5p_exported.html -->
         <iframe 
             id="h5pIframe" 
             src="6.html" 
@@ -72,6 +71,7 @@
     <!-- 分數將顯示在 p5.js 創建的 Canvas 上 -->
 </body>
 </html>
+
 
 
 
