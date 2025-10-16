@@ -1,15 +1,28 @@
-// =================================================================
-// 步驟一：模擬成績數據接收
-// -----------------------------------------------------------------
-
-// let finalScore = 85;
-// let maxScore = 100;
-// let scoreText = "成績分數: " + finalScore + "/" + maxScore;
-// 確保這是全域變數
+// 全域變數定義
 let finalScore = 0; 
 let maxScore = 0;
-let scoreText = ""; // 用於 p5.js 繪圖的文字
-// 在實際 H5P 應用中，您會使用以下機制來捕獲分數：
+let scoreText = "等待 H5P 成績中..."; 
+let scoreCanvas; // 儲存 p5.js 畫布物件
+
+// =================================================================
+// p5.js 繪圖邏輯
+// =================================================================
+function setup() {
+    // 讓 Canvas 尺寸匹配 iFrame
+    const container = document.getElementById('overlay-container');
+    const w = container.offsetWidth;
+    const h = container.offsetHeight;
+
+    scoreCanvas = createCanvas(w, h); // 將創建的畫布物件賦值給 scoreCanvas
+    scoreCanvas.parent('overlay-container'); // 將畫布附加到容器
+
+    // 初始隱藏畫布 (即使 CSS 已經設定，這也是一個確認步驟)
+    // 我們依賴 CSS 的 display: none 來隱藏畫布，但我們必須拿到這個 DOM 節點
+    // 註：如果使用 p5.js 的 scoreCanvas.hide()，它會自動將 display 設為 none。
+    scoreCanvas.hide(); 
+    
+    noLoop(); 
+} 
 
 // H5P.externalDispatcher.on('xAPI', function(event){
 //     // event.getScore() 取得分數，event.getMaxScore() 取得滿分
@@ -19,28 +32,28 @@ let scoreText = ""; // 用於 p5.js 繪圖的文字
 //     }
 // });
 
-window.addEventListener('message', function (event) {
-    // 執行來源驗證...
-    // ...
-    const data = event.data;
+// window.addEventListener('message', function (event) {
+//     // 執行來源驗證...
+//     // ...
+//     const data = event.data;
     
-    if (data && data.type === 'H5P_SCORE_RESULT') {
+//     if (data && data.type === 'H5P_SCORE_RESULT') {
         
-        // !!! 關鍵步驟：更新全域變數 !!!
-        finalScore = data.score; // 更新全域變數
-        maxScore = data.maxScore;
-        scoreText = `最終成績分數: ${finalScore}/${maxScore}`;
+//         // !!! 關鍵步驟：更新全域變數 !!!
+//         finalScore = data.score; // 更新全域變數
+//         maxScore = data.maxScore;
+//         scoreText = `最終成績分數: ${finalScore}/${maxScore}`;
         
-        console.log("新的分數已接收:", scoreText); 
+//         console.log("新的分數已接收:", scoreText); 
         
-        // ----------------------------------------
-        // 關鍵步驟 2: 呼叫重新繪製 (見方案二)
-        // ----------------------------------------
-        if (typeof redraw === 'function') {
-            redraw(); 
-        }
-    }
-}, false);
+//         // ----------------------------------------
+//         // 關鍵步驟 2: 呼叫重新繪製 (見方案二)
+//         // ----------------------------------------
+//         if (typeof redraw === 'function') {
+//             redraw(); 
+//         }
+//     }
+// }, false);
 
 
 // =================================================================
@@ -54,16 +67,16 @@ window.addEventListener('message', function (event) {
 //     noLoop(); // 如果您希望分數只有在改變時才繪製，保留此行
 // } 
 // 在 setup() 中將 canvas 放置到容器內
-function setup() {
-    // 讓 Canvas 尺寸匹配 iFrame
-    const container = document.getElementById('overlay-container');
-    const w = container.offsetWidth;
-    const h = container.offsetHeight;
+// function setup() {
+//     // 讓 Canvas 尺寸匹配 iFrame
+//     const container = document.getElementById('overlay-container');
+//     const w = container.offsetWidth;
+//     const h = container.offsetHeight;
 
-    let canvas = createCanvas(w, h); 
-    canvas.parent('overlay-container'); // 將畫布附加到容器
-    noLoop(); 
-} 
+//     let canvas = createCanvas(w, h); 
+//     canvas.parent('overlay-container'); // 將畫布附加到容器
+//     noLoop(); 
+// } 
 // score_display.js 中的 draw() 函數片段
 function draw() { 
     // 關鍵：每次繪製時，清除畫布，但如果希望背景透明，
@@ -133,3 +146,31 @@ function draw() {
     // 如果您想要更複雜的視覺效果，還可以根據分數修改線條粗細 (strokeWeight) 
     // 或使用 sin/cos 函數讓圖案的動畫效果有所不同 [8, 9]。
 }
+
+// =================================================================
+// 接收 postMessage 消息並更新分數
+// =================================================================
+window.addEventListener('message', function (event) {
+    
+    // ... (執行來源驗證邏輯) ...
+
+    const data = event.data;
+    
+    if (data && data.type === 'H5P_SCORE_RESULT') {
+        
+        // 1. 更新全域變數
+        finalScore = data.score;
+        maxScore = data.maxScore;
+        scoreText = `最終成績分數: ${finalScore}/${maxScore}`;
+
+        // 2. 關鍵步驟：顯示 p5.js 畫布
+        if (scoreCanvas) {
+            scoreCanvas.show(); // 顯示畫布 (等同於將 display 設為 block)
+        }
+        
+        // 3. 呼叫 p5.js 重新繪製
+        if (typeof redraw === 'function') {
+            redraw(); 
+        }
+    }
+}, false);
