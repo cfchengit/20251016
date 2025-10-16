@@ -2,19 +2,45 @@
 // 步驟一：模擬成績數據接收
 // -----------------------------------------------------------------
 
-let finalScore = 85;
-let maxScore = 100;
-let scoreText = "成績分數: " + finalScore + "/" + maxScore;
-
+// let finalScore = 85;
+// let maxScore = 100;
+// let scoreText = "成績分數: " + finalScore + "/" + maxScore;
+// 確保這是全域變數
+let finalScore = 0; 
+let maxScore = 0;
+let scoreText = ""; // 用於 p5.js 繪圖的文字
 // 在實際 H5P 應用中，您會使用以下機制來捕獲分數：
 
-H5P.externalDispatcher.on('xAPI', function(event){
-    // event.getScore() 取得分數，event.getMaxScore() 取得滿分
-    if (event.getScore() === event.getMaxScore() && event.getMaxScore() > 0){
-        // 這裡可以將分數儲存到變數中或進行其他操作
-        console.log('使用者獲得了滿分！');
+// H5P.externalDispatcher.on('xAPI', function(event){
+//     // event.getScore() 取得分數，event.getMaxScore() 取得滿分
+//     if (event.getScore() === event.getMaxScore() && event.getMaxScore() > 0){
+//         // 這裡可以將分數儲存到變數中或進行其他操作
+//         console.log('使用者獲得了滿分！');
+//     }
+// });
+
+window.addEventListener('message', function (event) {
+    // 執行來源驗證...
+    // ...
+    const data = event.data;
+    
+    if (data && data.type === 'H5P_SCORE_RESULT') {
+        
+        // !!! 關鍵步驟：更新全域變數 !!!
+        finalScore = data.score; // 更新全域變數
+        maxScore = data.maxScore;
+        scoreText = `最終成績分數: ${finalScore}/${maxScore}`;
+        
+        console.log("新的分數已接收:", scoreText); 
+        
+        // ----------------------------------------
+        // 關鍵步驟 2: 呼叫重新繪製 (見方案二)
+        // ----------------------------------------
+        if (typeof redraw === 'function') {
+            redraw(); 
+        }
     }
-});
+}, false);
 
 
 // =================================================================
