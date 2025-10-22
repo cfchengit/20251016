@@ -9,6 +9,26 @@ let fireworks = [];
 let gravity;
 const FIREWORK_COUNTDOWN = 60; // 煙火爆炸前上升的幀數 (約 1 秒)
 
+// **新增音效變數**
+let launchSound; // 火箭發射音效
+let explodeSound; // 爆炸音效
+
+// =================================================================
+// **p5.js 預載入音效**
+// =================================================================
+function preload() {
+    // 假設你的音效檔名為 launch.mp3 和 explode.mp3 且放在相同目錄
+    // 請將 'path/to/' 替換為你的實際路徑，或確保檔案就在根目錄
+    //=+++++++++++++++++++++++++++++++++++++++++++++++++++
+    // try {
+    //     launchSound = loadSound('launch.mp3');
+    //     explodeSound = loadSound('explode.mp3');
+    // } catch (error) {
+    //     console.error("音效載入失敗，請檢查檔案路徑 (launch.mp3, explode.mp3) 和 p5.sound.js 是否正確引入:", error);
+    // }
+}
+
+
 // =================================================================
 // 類別定義 (Particle & Firework)
 // =================================================================
@@ -50,12 +70,12 @@ class Particle {
         colorMode(HSB);
 
         if (this.firework) {
-            // 火箭的樣子 (白色小點)
-            strokeWeight(4);
+            // 火箭的樣子 (顆粒略大)
+            strokeWeight(6); // **調整：火箭顆粒加大**
             stroke(this.hu, 255, 255);
         } else {
-            // 碎片的樣子 (彩色點，透明度隨著生命週期減少)
-            strokeWeight(2);
+            // 碎片的樣子 (顆粒略大，透明度隨著生命週期減少)
+            strokeWeight(3); // **調整：碎片顆粒加大**
             stroke(this.hu, 255, 255, this.lifespan);
         }
         point(this.pos.x, this.pos.y);
@@ -75,6 +95,11 @@ class Firework {
         this.exploded = false;
         this.particles = [];
         this.timer = FIREWORK_COUNTDOWN;
+        
+        // **新增：發射音效**+++++++++++++++++++++++++++++++++++++++++++++++
+        // if (launchSound && launchSound.isLoaded()) {
+        //      launchSound.play();
+        // }
     }
 
     update() {
@@ -101,6 +126,11 @@ class Firework {
 
     // 火箭爆炸成碎片
     explode() {
+        // **新增：爆炸音效**+++++++++++++++++++++++++++++++++++++++++++++
+        // if (explodeSound && explodeSound.isLoaded()) {
+        //      explodeSound.play();
+        // }
+        
         for (let i = 0; i < 100; i++) {
             const p = new Particle(this.firework.pos.x, this.firework.pos.y, this.hu, false);
             this.particles.push(p);
@@ -145,20 +175,16 @@ function setup() {
     // 初始隱藏畫布
     scoreCanvas.hide(); 
     
-    // 保持 draw 函式只在收到訊息後執行一次，但為了煙火動畫需要 loop
-    // 只有在收到分數且分數夠高時才啟動 loop
     noLoop(); 
 } 
 
 function draw() { 
-    // 為背景增加少量透明度，製造煙火尾跡的殘影效果
+    // 使用透明背景來製造煙火尾跡的殘影效果 (更逼真)
     background(0, 0, 0, 25); 
     
     colorMode(RGB); // 切換回 RGB 模式繪製文字和基本圖形
-    clear(); // 改回清除畫布，以保持 H5P 內容可見，但這樣會犧牲煙火殘影效果
-    // 如果您希望煙火有殘影（像真實煙火），請將上一行的 clear() 註釋掉，
-    // 並取消註釋下一行的 background 
-    // background(0, 0, 0, 25); // 這行會讓畫面有殘影效果
+    // 如果你不想要殘影，取消註釋下一行，但請注意煙火看起來會不太自然
+    // clear(); 
 
     // 計算百分比
     let percentage = (finalScore / maxScore) * 100;
@@ -261,6 +287,8 @@ window.addEventListener('message', function (event) {
         if (typeof redraw === 'function') {
             if ((finalScore / maxScore) * 100 >= 90) {
                 // 如果是高分，啟動 loop 以執行動畫
+                // 確保音效的播放能在瀏覽器環境中執行 (通常需要使用者互動後才能播放)
+                // 由於 postMessage 是互動後觸發，通常可以播放
                 loop(); 
             } else {
                 // 否則只繪製一次靜態結果
