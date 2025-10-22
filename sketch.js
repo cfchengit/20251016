@@ -171,7 +171,7 @@ function draw() {
     
     if (finalScore === 0) {
         // **狀態：等待成績 (初始狀態)**
-        
+        scoreText ="再試一次"
         // 繪製等待文字
         drawTextBox(scoreText, width / 2, height / 2, 400, 80);
         
