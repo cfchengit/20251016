@@ -11,13 +11,8 @@ const FIREWORK_COUNTDOWN = 60;
 
 
 // =================================================================
-// **!!! 移除 preload() 函式和所有音效相關變數 !!!**
-// =================================================================
-
-
-// =================================================================
 // 類別定義 (Particle & Firework)
-// (與上一個版本相同，但已移除所有音效播放邏輯)
+// (與上一個版本相同，已移除音效)
 // =================================================================
 
 // 粒子類別 (用於火箭和爆炸碎片)
@@ -125,10 +120,26 @@ class Firework {
 }
 
 // =================================================================
+// 輔助函式：繪製帶有背景框的文字
+// =================================================================
+function drawTextBox(textString, x, y, boxW, boxH) {
+    // 繪製半透明白色方框背景
+    fill(255, 255, 255, 204); // 白色，透明度 80%
+    noStroke();
+    rectMode(CENTER);
+    rect(x, y, boxW, boxH, 10); // 圓角半徑 10
+
+    // 繪製文字 (文字顏色使用黑色，以配合白色背景)
+    fill(0); // 黑色文字
+    textSize(30); 
+    textAlign(CENTER, CENTER);
+    text(textString, x, y);
+}
+
+// =================================================================
 // p5.js 繪圖邏輯
 // =================================================================
 function setup() {
-    // 讓 Canvas 尺寸匹配 iFrame
     const container = document.getElementById('overlay-container');
     const w = container.offsetWidth;
     const h = container.offsetHeight;
@@ -139,48 +150,41 @@ function setup() {
     colorMode(HSB, 255); 
     gravity = createVector(0, 0.2); 
 
-    // 初始隱藏畫布
     scoreCanvas.hide(); 
     
-    // **預設啟動 loop()，確保一旦 canvas 顯示，draw() 就會持續執行**
-    // 這樣可以避免因為 noLoop() 導致靜態畫面不更新的問題。
     loop(); 
-    noLoop(); // 先呼叫 noLoop()，等待接收到成績時再用 loop() 啟動
+    noLoop(); 
 } 
 
 function draw() { 
-    // 每次繪製，先清除畫布，以覆蓋 H5P 內容和前一幀的文字
-    clear(); 
-    
-    // 如果分數還沒傳來 (finalScore 還是 0，且 scoreCanvas 是隱藏的)，則顯示等待文字
-    // **注意：由於 scoreCanvas 預設是隱藏的，這裡的邏輯需要調整**
-    // **簡化邏輯：如果 finalScore 是 0 (初始值)，則顯示等待文字**
+    clear(); // 每次繪製，先清除畫布
 
     colorMode(RGB); 
-    textSize(50); 
-    textAlign(CENTER);
     
-    if (finalScore === 0) {
-        // **狀態：等待成績**
-        fill(150); 
-        text(scoreText, width / 2, height / 2);
+    if (finalScore === 0 && maxScore === 0) {
+        // **狀態：等待成績 (初始狀態)**
         
-        // **這裡必須 return，不然後續的程式碼可能會導致畫面閃爍**
+        // 繪製等待文字
+        drawTextBox(scoreText, width / 2, height / 2, 400, 80);
+        
         return; 
     }
     
     // **狀態：顯示成績**
-    // 使用透明背景來製造煙火殘影
+    // 只有在顯示成績時才使用透明背景來製造煙火殘影
     background(0, 0, 0, 25); 
 
     let percentage = (finalScore / maxScore) * 100;
-    let textYOffset = height / 2 - 70;
+    let textYOffset = height / 2 - 100; // 調整位置以騰出空間給分數框
     let shapeYOffset = height / 2 + 150;
 
-    // A. 繪製文本
+    // A. 繪製祝賀/提示文字 (第一行文字，居中)
+    let mainText = "";
+    let mainTextColor = color(0); // 預設黑色
+
     if (percentage >= 90) {
-        fill(0, 200, 50); 
-        text("恭喜！優異成績！", width / 2, textYOffset);
+        mainText = "恭喜！優異成績！";
+        mainTextColor = color(0, 200, 50); // 綠色
         
         // 觸發煙火發射 (如果分數夠高)
         if (frameCount % 10 === 0 && random(1) < 0.2) { 
@@ -188,20 +192,30 @@ function draw() {
         }
         
     } else if (percentage >= 60) {
-        fill(255, 181, 35); 
-        text("成績良好，請再接再厲。", width / 2, textYOffset);
+        mainText = "成績良好，請再接再厲。";
+        mainTextColor = color(255, 181, 35); // 黃色
         
     } else {
-        fill(200, 0, 0); 
-        text("需要加強努力！", width / 2, textYOffset);
+        mainText = "需要加強努力！";
+        mainTextColor = color(200, 0, 0); // 紅色
     }
     
-    // 繪製具體分數
-    textSize(50); 
-    fill(50);
-    text(`${finalScore}/${maxScore}`, width / 2, height / 2 + 50);
+    // 繪製第一行文字的背景框
+    drawTextBox(mainText, width / 2, textYOffset, 450, 80);
+    
+    // 重新繪製第一行文字，使用動態顏色
+    textSize(30);
+    textAlign(CENTER, CENTER);
+    fill(mainTextColor);
+    text(mainText, width / 2, textYOffset);
 
+    // **B. 繪製實際分數 (第二行文字，放在中央)**
+    let scoreDisplay = `得分: ${finalScore}/${maxScore}`;
+    drawTextBox(scoreDisplay, width / 2, height / 2, 300, 80);
+    
+    // -----------------------------------------------------------------
     // C. 煙火動畫更新與繪製
+    // -----------------------------------------------------------------
     for (let i = fireworks.length - 1; i >= 0; i--) {
         fireworks[i].update();
         fireworks[i].show();
@@ -211,7 +225,7 @@ function draw() {
         }
     }
     
-    // B. 繪製幾何圖形
+    // D. 繪製幾何圖形 (與舊版本邏輯相同)
     if (percentage >= 90) {
         fill(0, 200, 50, 150); 
         noStroke();
@@ -221,6 +235,14 @@ function draw() {
         fill(255, 181, 35, 150);
         rectMode(CENTER);
         rect(width / 2, shapeYOffset, 150, 150);
+    }
+
+    // 判斷是否停止 loop
+    if (fireworks.length === 0 && percentage < 90) {
+        noLoop(); // 靜態分數顯示完成，停止動畫
+    } else if (fireworks.length === 0 && percentage >= 90) {
+        // 煙火放完後，停止動畫，保持靜態畫面
+        noLoop();
     }
 }
 
@@ -244,9 +266,8 @@ window.addEventListener('message', function (event) {
         }
         
         // 3. 呼叫 p5.js 重新繪製
-        // **強制 loop() 啟動，讓 draw() 持續執行**
         if (typeof loop === 'function') {
-            loop(); 
+            loop(); // 強制啟動 loop() 以持續繪製動畫或靜態畫面
         }
     }
 }, false);
