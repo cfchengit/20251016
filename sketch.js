@@ -20,13 +20,13 @@ let launchSound, explodeSound; // 假設音效變數已在 preload() 中定義
 
 // ... (Particle, Firework 類別定義與 preload() 保持不變) ...
 function preload() {
-    // ... (音效載入，與上一個版本相同) ...
-    try {
-        launchSound = loadSound('launch.mp3');
-        explodeSound = loadSound('explode.mp3');
-    } catch (error) {
-        console.error("音效載入失敗，請檢查檔案路徑 (launch.mp3, explode.mp3) 和 p5.sound.js 是否正確引入:", error);
-    }
+    // ... (音效載入，與上一個版本相同) ...+++++++++++++++++++++++++++++++++++++++++++++++++
+    // try {
+    //     launchSound = loadSound('launch.mp3');
+    //     explodeSound = loadSound('explode.mp3');
+    // } catch (error) {
+    //     console.error("音效載入失敗，請檢查檔案路徑 (launch.mp3, explode.mp3) 和 p5.sound.js 是否正確引入:", error);
+    // }
 }
 // ... (Particle, Firework 類別定義與上一個版本相同) ...
 
