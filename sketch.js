@@ -165,8 +165,10 @@ function setup() {
 
 function draw() { 
     if (finalScore !== 0) {
+        // 顯示成績狀態：使用透明背景模擬殘影
         background(0, 0, 0, 25); 
     } else {
+        // 等待狀態：完全清除背景
         clear();
     }
     
@@ -194,6 +196,7 @@ function draw() {
         mainText = "恭喜！優異成績！";
         mainTextColor = color(0, 200, 50); 
         
+        // 觸發煙火發射 (如果分數夠高)
         if (frameCount % 5 === 0 && random(1) < 0.3) { 
             fireworks.push(new Firework(random(width), height));
         }
@@ -235,17 +238,18 @@ function draw() {
         rect(width / 2, shapeYOffset, 150, 150);
     }
     
-    // E. 決定是否顯示按鈕和停止動畫
-    if (fireworks.length === 0) {
-        // 煙火放完了，顯示按鈕，並停止動畫
-        showRetryButton = true;
-        noLoop(); 
-    } else {
+    // E. 決定是否顯示按鈕和停止動畫 **(修正邏輯)**
+    if (percentage >= 90 && fireworks.length > 0) {
+        // 正在放煙火，保持 loop，不顯示按鈕
         showRetryButton = false;
-        loop(); // 還有煙火在飛，保持動畫
+        loop(); 
+    } else {
+        // 靜態分數 (無煙火或低分)
+        showRetryButton = true;
+        noLoop(); // 停止動畫，保持靜態畫面
     }
 
-    // 繪製按鈕 (如果需要顯示)
+    // 繪製按鈕
     if (showRetryButton) {
         drawRetryButton();
     }
@@ -299,12 +303,13 @@ function mousePressed() {
             finalScore = 0;
             maxScore = 0;
             scoreText = "等待 H5P 成績中..."; 
-            fireworks = []; // 清空所有煙火粒子
+            fireworks = []; 
+            showRetryButton = false; // 隱藏按鈕
             
             // 3. 停止繪製，等待下一次 postMessage 觸發 loop
             noLoop(); 
             
-            // 4. 重新繪製一次靜態的「等待中」畫面，這樣 H5P 的內容能馬上顯示
+            // 4. 重新繪製一次靜態的「等待中」畫面
             redraw(); 
         }
     }
