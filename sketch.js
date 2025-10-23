@@ -9,9 +9,16 @@ let fireworks = [];
 let gravity;
 const FIREWORK_COUNTDOWN = 60; 
 
+// 按鈕相關變數
+let showRetryButton = false;
+let retryButton = {
+    x: 0, y: 0, w: 200, h: 50, text: "再試一次"
+};
+
 
 // =================================================================
 // 類別定義 (Particle & Firework)
+// (與上一個版本相同，已移除音效)
 // =================================================================
 
 // 粒子類別 (用於火箭和爆炸碎片)
@@ -49,11 +56,9 @@ class Particle {
         colorMode(HSB);
 
         if (this.firework) {
-            // 火箭顆粒大小
             strokeWeight(6); 
             stroke(this.hu, 255, 255);
         } else {
-            // 碎片顆粒大小
             strokeWeight(3); 
             stroke(this.hu, 255, 255, this.lifespan);
         }
@@ -69,7 +74,6 @@ class Particle {
 class Firework {
     constructor(startX, startY) {
         this.hu = random(255); 
-        // 從畫布底部發射
         this.firework = new Particle(startX, height, this.hu, true); 
         this.exploded = false;
         this.particles = [];
@@ -82,8 +86,7 @@ class Firework {
             this.firework.update();
             
             this.timer--;
-            // 判斷是否應該爆炸
-            if (this.timer <= 0 || this.firework.vel.y >= 0) { // 檢查是否到達頂點或計時結束
+            if (this.timer <= 0 || this.firework.vel.y >= 0) { 
                 this.explode();
                 this.exploded = true;
             }
@@ -123,15 +126,15 @@ class Firework {
 // =================================================================
 // 輔助函式：繪製帶有背景框的文字
 // =================================================================
-function drawTextBox(textString, x, y, boxW, boxH) {
-    // 繪製半透明白色方框背景
-    fill(255, 255, 255, 204); // 白色，透明度 80%
+function drawTextBox(textString, x, y, boxW, boxH, textColor = 0) {
+    // 繪製半透明白色方框背景 (透明度 80%)
+    fill(255, 255, 255, 204); 
     noStroke();
     rectMode(CENTER);
-    rect(x, y, boxW, boxH, 10); // 圓角半徑 10
+    rect(x, y, boxW, boxH, 10); 
 
-    // 繪製文字 (文字顏色使用黑色，以配合白色背景)
-    fill(0); // 黑色文字
+    // 繪製文字
+    fill(textColor); 
     textSize(30); 
     textAlign(CENTER, CENTER);
     text(textString, x, y);
@@ -153,38 +156,37 @@ function setup() {
 
     scoreCanvas.hide(); 
     
-    // 預設停止，等待 postMessage 喚醒
+    // 初始化按鈕位置
+    retryButton.x = width / 2;
+    retryButton.y = height - 100; // 放在畫面下方
+    
     noLoop(); 
 } 
 
 function draw() { 
-    // **關鍵修正：只清除畫布頂部，讓煙火殘影可以疊加**
     if (finalScore !== 0) {
-        // 如果已經開始顯示成績，使用透明黑色背景來模擬殘影效果
         background(0, 0, 0, 25); 
     } else {
-        // 如果在等待狀態，完全清除背景以避免殘留
         clear();
     }
     
     colorMode(RGB); 
+    textSize(30); 
+    textAlign(CENTER);
     
     if (finalScore === 0) {
-        // **狀態：等待成績 (初始狀態)**
-        scoreText ="再試一次"
-        // 繪製等待文字
+        // **狀態：等待成績**
         drawTextBox(scoreText, width / 2, height / 2, 400, 80);
-        
         return; 
     }
     
-    // **狀態：顯示成績**
+    // **狀態：顯示成績 (此時 loop 應該是啟動的)**
     
     let percentage = (finalScore / maxScore) * 100;
     let textYOffset = height / 2 - 100; 
     let shapeYOffset = height / 2 + 150;
 
-    // A. 繪製祝賀/提示文字 (第一行文字，居中)
+    // A. 繪製祝賀/提示文字 (第一行文字)
     let mainText = "";
     let mainTextColor = color(0); 
 
@@ -192,8 +194,6 @@ function draw() {
         mainText = "恭喜！優異成績！";
         mainTextColor = color(0, 200, 50); 
         
-        // 觸發煙火發射 (如果分數夠高)
-        // **調整：提高發射頻率，讓煙火更頻繁出現**
         if (frameCount % 5 === 0 && random(1) < 0.3) { 
             fireworks.push(new Firework(random(width), height));
         }
@@ -207,23 +207,13 @@ function draw() {
         mainTextColor = color(200, 0, 0); 
     }
     
-    // 繪製第一行文字的背景框
-    drawTextBox(mainText, width / 2, textYOffset, 450, 80);
+    drawTextBox(mainText, width / 2, textYOffset, 450, 80, mainTextColor);
     
-    // 重新繪製第一行文字，使用動態顏色
-    textSize(30);
-    textAlign(CENTER, CENTER);
-    fill(mainTextColor);
-    text(mainText, width / 2, textYOffset);
-
-    // **B. 繪製實際分數 (第二行文字，放在中央)**
+    // B. 繪製實際分數 (第二行文字)
     let scoreDisplay = `得分: ${finalScore}/${maxScore}`;
     drawTextBox(scoreDisplay, width / 2, height / 2, 300, 80);
     
-    // -----------------------------------------------------------------
     // C. 煙火動畫更新與繪製
-    // **這部分邏輯必須在 draw() 執行時被觸發**
-    // -----------------------------------------------------------------
     for (let i = fireworks.length - 1; i >= 0; i--) {
         fireworks[i].update();
         fireworks[i].show();
@@ -233,7 +223,7 @@ function draw() {
         }
     }
     
-    // D. 繪製幾何圖形 (與舊版本邏輯相同)
+    // D. 繪製幾何圖形 
     if (percentage >= 90) {
         fill(0, 200, 50, 150); 
         noStroke();
@@ -244,16 +234,78 @@ function draw() {
         rectMode(CENTER);
         rect(width / 2, shapeYOffset, 150, 150);
     }
-
-    // 判斷是否停止 loop
-    if (percentage < 90 && fireworks.length === 0) {
-        // 靜態分數顯示完成，停止動畫
+    
+    // E. 決定是否顯示按鈕和停止動畫
+    if (fireworks.length === 0) {
+        // 煙火放完了，顯示按鈕，並停止動畫
+        showRetryButton = true;
         noLoop(); 
-    } else if (percentage >= 90 && fireworks.length === 0) {
-        // 如果高分，但煙火放完了，可以繼續發射新的煙火直到 loop() 停止
-        // 我們讓它持續 loop，直到分數改變或頁面刷新
-        if (frameCount > 60 * 10) { // 假設10秒後停止
-            noLoop();
+    } else {
+        showRetryButton = false;
+        loop(); // 還有煙火在飛，保持動畫
+    }
+
+    // 繪製按鈕 (如果需要顯示)
+    if (showRetryButton) {
+        drawRetryButton();
+    }
+}
+
+// **新增函式：繪製「再試一次」按鈕**
+function drawRetryButton() {
+    // 計算按鈕的邊界，用於點擊判斷
+    retryButton.x = width / 2;
+    retryButton.y = height - 100; // 保持在底部
+    
+    // 按鈕背景 (藍色，點擊時會變色)
+    if (
+        mouseX > retryButton.x - retryButton.w / 2 && 
+        mouseX < retryButton.x + retryButton.w / 2 &&
+        mouseY > retryButton.y - retryButton.h / 2 && 
+        mouseY < retryButton.y + retryButton.h / 2
+    ) {
+        fill(50, 150, 255, 255); // 滑鼠懸停時顏色變亮
+    } else {
+        fill(0, 100, 200, 255); // 常規藍色
+    }
+    
+    noStroke();
+    rectMode(CENTER);
+    rect(retryButton.x, retryButton.y, retryButton.w, retryButton.h, 10);
+    
+    // 按鈕文字 (白色)
+    fill(255);
+    textSize(22);
+    textAlign(CENTER, CENTER);
+    text(retryButton.text, retryButton.x, retryButton.y);
+}
+
+// **新增函式：處理滑鼠點擊**
+function mousePressed() {
+    if (showRetryButton) {
+        // 檢查點擊是否在按鈕區域內
+        if (
+            mouseX > retryButton.x - retryButton.w / 2 && 
+            mouseX < retryButton.x + retryButton.w / 2 &&
+            mouseY > retryButton.y - retryButton.h / 2 && 
+            mouseY < retryButton.y + retryButton.h / 2
+        ) {
+            // 執行「再試一次」邏輯
+            
+            // 1. 隱藏 Canvas
+            scoreCanvas.hide();
+            
+            // 2. 重置狀態變數
+            finalScore = 0;
+            maxScore = 0;
+            scoreText = "等待 H5P 成績中..."; 
+            fireworks = []; // 清空所有煙火粒子
+            
+            // 3. 停止繪製，等待下一次 postMessage 觸發 loop
+            noLoop(); 
+            
+            // 4. 重新繪製一次靜態的「等待中」畫面，這樣 H5P 的內容能馬上顯示
+            redraw(); 
         }
     }
 }
@@ -277,9 +329,9 @@ window.addEventListener('message', function (event) {
             scoreCanvas.show(); 
         }
         
-        // 3. 呼叫 p5.js 重新繪製
+        // 3. 呼叫 p5.js 啟動繪圖
         if (typeof loop === 'function') {
-            loop(); // 強制啟動 loop() 以持續繪製動畫或靜態畫面
+            loop(); 
         }
     }
 }, false);
