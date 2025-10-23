@@ -9,11 +9,8 @@ let fireworks = [];
 let gravity;
 const FIREWORK_COUNTDOWN = 60; 
 
-// 按鈕相關變數
-let showRetryButton = false;
-let retryButton = {
-    x: 0, y: 0, w: 200, h: 50, text: "再試一次"
-};
+// **DOM 按鈕變數**
+let retryButton; 
 
 
 // =================================================================
@@ -140,6 +137,26 @@ function drawTextBox(textString, x, y, boxW, boxH, textColor = 0) {
     text(textString, x, y);
 }
 
+// **新增函式：按鈕點擊處理邏輯**
+function handleRetryClick() {
+    // 1. 隱藏 Canvas 和 DOM 按鈕
+    scoreCanvas.hide();
+    retryButton.hide();
+    
+    // 2. 重置狀態變數
+    finalScore = 0;
+    maxScore = 0;
+    scoreText = "等待 H5P 成績中..."; 
+    fireworks = []; 
+    
+    // 3. 停止繪製
+    noLoop(); 
+    
+    // 4. 重新繪製一次靜態的「等待中」畫面
+    redraw(); 
+}
+
+
 // =================================================================
 // p5.js 繪圖邏輯
 // =================================================================
@@ -156,25 +173,36 @@ function setup() {
 
     scoreCanvas.hide(); 
     
-    // 初始化按鈕位置
-    retryButton.x = width / 2;
-    retryButton.y = height - 100; // 放在畫面下方
+    // **創建 DOM 按鈕 (位於 Canvas 外部，但重疊)**
+    retryButton = createButton('再試一次');
+    // 設置按鈕樣式，使其位於畫布底部中央
+    retryButton.style('width', '200px');
+    retryButton.style('height', '50px');
+    retryButton.style('background-color', 'rgb(0, 100, 200)');
+    retryButton.style('color', 'white');
+    retryButton.style('border', 'none');
+    retryButton.style('border-radius', '10px');
+    retryButton.style('font-size', '22px');
+    retryButton.style('cursor', 'pointer');
+    
+    // 將按鈕添加到容器，並使用絕對定位
+    retryButton.parent('overlay-container');
+    retryButton.position(w / 2 - 100, h - 125); // 100 = w/2, 125 = h + 邊距
+    
+    // 添加點擊事件處理器
+    retryButton.mousePressed(handleRetryClick);
+    
+    // 初始隱藏按鈕
+    retryButton.hide();
     
     noLoop(); 
 } 
 
 function draw() { 
-    if (finalScore !== 0) {
-        // 顯示成績狀態：使用透明背景模擬殘影
-        background(0, 0, 0, 25); 
-    } else {
-        // 等待狀態：完全清除背景
-        clear();
-    }
+    // **修正煙火顯示問題：每次完全清除畫布**
+    clear(); 
     
     colorMode(RGB); 
-    textSize(30); 
-    textAlign(CENTER);
     
     if (finalScore === 0) {
         // **狀態：等待成績**
@@ -182,13 +210,13 @@ function draw() {
         return; 
     }
     
-    // **狀態：顯示成績 (此時 loop 應該是啟動的)**
+    // **狀態：顯示成績**
     
     let percentage = (finalScore / maxScore) * 100;
     let textYOffset = height / 2 - 100; 
     let shapeYOffset = height / 2 + 150;
 
-    // A. 繪製祝賀/提示文字 (第一行文字)
+    // A. 繪製祝賀/提示文字
     let mainText = "";
     let mainTextColor = color(0); 
 
@@ -196,7 +224,7 @@ function draw() {
         mainText = "恭喜！優異成績！";
         mainTextColor = color(0, 200, 50); 
         
-        // 觸發煙火發射 (如果分數夠高)
+        // 觸發煙火發射
         if (frameCount % 5 === 0 && random(1) < 0.3) { 
             fireworks.push(new Firework(random(width), height));
         }
@@ -212,7 +240,7 @@ function draw() {
     
     drawTextBox(mainText, width / 2, textYOffset, 450, 80, mainTextColor);
     
-    // B. 繪製實際分數 (第二行文字)
+    // B. 繪製實際分數
     let scoreDisplay = `得分: ${finalScore}/${maxScore}`;
     drawTextBox(scoreDisplay, width / 2, height / 2, 300, 80);
     
@@ -238,80 +266,15 @@ function draw() {
         rect(width / 2, shapeYOffset, 150, 150);
     }
     
-    // E. 決定是否顯示按鈕和停止動畫 **(修正邏輯)**
+    // E. 決定是否顯示按鈕和停止動畫
     if (percentage >= 90 && fireworks.length > 0) {
-        // 正在放煙火，保持 loop，不顯示按鈕
-        showRetryButton = false;
+        // 正在放煙火，保持 loop，隱藏按鈕
+        retryButton.hide();
         loop(); 
     } else {
-        // 靜態分數 (無煙火或低分)
-        showRetryButton = true;
-        noLoop(); // 停止動畫，保持靜態畫面
-    }
-
-    // 繪製按鈕
-    if (showRetryButton) {
-        drawRetryButton();
-    }
-}
-
-// **新增函式：繪製「再試一次」按鈕**
-function drawRetryButton() {
-    // 計算按鈕的邊界，用於點擊判斷
-    retryButton.x = width / 2;
-    retryButton.y = height - 100; // 保持在底部
-    
-    // 按鈕背景 (藍色，點擊時會變色)
-    if (
-        mouseX > retryButton.x - retryButton.w / 2 && 
-        mouseX < retryButton.x + retryButton.w / 2 &&
-        mouseY > retryButton.y - retryButton.h / 2 && 
-        mouseY < retryButton.y + retryButton.h / 2
-    ) {
-        fill(50, 150, 255, 255); // 滑鼠懸停時顏色變亮
-    } else {
-        fill(0, 100, 200, 255); // 常規藍色
-    }
-    
-    noStroke();
-    rectMode(CENTER);
-    rect(retryButton.x, retryButton.y, retryButton.w, retryButton.h, 10);
-    
-    // 按鈕文字 (白色)
-    fill(255);
-    textSize(22);
-    textAlign(CENTER, CENTER);
-    text(retryButton.text, retryButton.x, retryButton.y);
-}
-
-// **新增函式：處理滑鼠點擊**
-function mousePressed() {
-    if (showRetryButton) {
-        // 檢查點擊是否在按鈕區域內
-        if (
-            mouseX > retryButton.x - retryButton.w / 2 && 
-            mouseX < retryButton.x + retryButton.w / 2 &&
-            mouseY > retryButton.y - retryButton.h / 2 && 
-            mouseY < retryButton.y + retryButton.h / 2
-        ) {
-            // 執行「再試一次」邏輯
-            
-            // 1. 隱藏 Canvas
-            scoreCanvas.hide();
-            
-            // 2. 重置狀態變數
-            finalScore = 0;
-            maxScore = 0;
-            scoreText = "等待 H5P 成績中..."; 
-            fireworks = []; 
-            showRetryButton = false; // 隱藏按鈕
-            
-            // 3. 停止繪製，等待下一次 postMessage 觸發 loop
-            noLoop(); 
-            
-            // 4. 重新繪製一次靜態的「等待中」畫面
-            redraw(); 
-        }
+        // 靜態分數顯示完成 (低分或煙火放完)，停止動畫，顯示按鈕
+        retryButton.show();
+        noLoop(); 
     }
 }
 
